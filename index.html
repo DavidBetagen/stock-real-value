@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Document</title>
+
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.16/dist/css/uikit.min.css" />
+
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.16/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.16/dist/js/uikit-icons.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+
+</head>
+<body>
+    <div id="app">
+        <div class="uk-container">
+            <div class="uk-margin-medium-top">
+                <div id="fist_box">
+                    <div class="uk-flex uk-flex-center uk-margin-small-top" v-for="first, i in first_list" v-bind:key="i">
+                        <input v-model="first.year" class="uk-input" type="text" placeholder="ปี">
+                        <input v-model="first.net_income" class="uk-input uk-form-success uk-margin-left" type="text" placeholder="รายได้รวม">
+                        <span class="uk-margin-left"> + </span>
+                        <input v-model="first.depreciation" class="uk-input uk-form-success uk-margin-left" type="text" placeholder="ค่าเสื่อม, ค่าใช่จ่ายตัดจ่าย">
+                        <span class="uk-margin-left"> - </span>    
+                        <input v-model="first.invest_cost" class="uk-input uk-form-danger uk-margin-left" type="text" placeholder="ค่าใช้จ่ายในการลงทุน">
+                        <span class="uk-margin-left"> = </span>
+                        <input v-model="first.owner_income" class="uk-input uk-margin-left" type="text" placeholder="รายได้ของเจ้าของ" disabled>
+                        <button v-on:click="firstTrash(i)" class="uk-button uk-button-danger uk-margin-left"><span uk-icon="icon: trash; ratio: 6"></span></button>
+                    </div>
+                </div>
+                <p class="uk-align-right uk-margin-medium-top">
+                    <button v-on:click="firstAdd" class="uk-button uk-button-secondary"><span uk-icon="plus"></span></button>
+                    <button v-on:click="firstCal" class="uk-button uk-button-primary"><span uk-icon="bolt"></span></button>
+                </p>
+            </div>
+        </div>
+        <div class="uk-container">
+            <div class="uk-margin-medium-top">
+                <div id="seconde_box">
+                    <table class="uk-table uk-table-hover uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th>ปี</th>
+                                <th>รายได้ของเจ้าของสุดท้าย</th>
+                                <th>อัตราการเติบโต %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(second, i) in second_list" v-bind:key="i">
+                                <td><span v-text="second.year"></span></td>
+                                <td><span v-text="second.owner_income"></span></td>
+                                <td><span v-text="second.growth"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- <p class="uk-align-right uk-margin-medium-top">
+                    <button v-on:click="firstAdd" class="uk-button uk-button-secondary"><span uk-icon="plus"></span></button>
+                    <button v-on:click="firstCal" class="uk-button uk-button-primary"><span uk-icon="check"></span></button>
+                </p> -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    first_list: [
+                        {"year": "", "net_income": "", "depreciation": "", "invest_cost": "", "owner_income": ""}
+                    ],
+                    second_list: []
+                }
+            },
+            computed: {
+                firstTotal() {
+                    for(i in this.first_list) {
+                        let net_income = parseFloat(this.first_list[i].net_income) || 0
+                        let depreciation = parseFloat(this.first_list[i].depreciation) || 0
+                        let invest_cost = parseFloat(this.first_list[i].invest_cost) || 0
+                        this.first_list[i].owner_income = net_income + depreciation - invest_cost
+
+                        this.first_list[i].owner_income = this.first_list[i].owner_income || ""
+                    }
+                    console.log(this.first_list)
+                    return this.first_list
+                }
+            },
+            methods: {
+                firstAdd: function () {
+                    this.first_list.push({})
+                },
+                firstTrash: function (index) {
+                    this.first_list.splice(index, 1);
+                },
+                firstCal: function () {
+                    this.clearSecond()
+                    for(i in this.first_list) {
+                        if(i > 0) {
+                            var dif = this.first_list[i].owner_income - this.first_list[i - 1].owner_income
+                            var growth = (dif * 100) / this.first_list[i].owner_income
+                        } else {
+                            var growth = "no data"
+                        }
+                        this.second_list.push(
+                            {
+                                "year": this.first_list[i].year,
+                                "owner_income": this.first_list[i].owner_income,
+                                "growth": growth,
+                            }
+                        )
+                    }
+                },
+                clearSecond: function () {
+                    this.second_list = []
+                }
+              }
+        })
+        
+    </script>
+</body>
+</html>
